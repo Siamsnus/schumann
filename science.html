@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Read Schumann Resonance Charts | Understanding the Data</title>
+    <meta name="description" content="Learn how to interpret Schumann Resonance spectrograms, amplitude charts, frequency plots, Q-factors, ionograms, and solar activity data. A guide to understanding live Schumann monitoring.">
+    <meta name="keywords" content="Schumann resonance spectrogram, how to read ionogram, Q-factor explained, ELF spectrogram interpretation, geomagnetic K-index, solar X-ray flux">
+    <link rel="canonical" href="https://siamsnus.github.io/schumann/science.html">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        :root{--bg:#0a0e17;--card:#151d2e;--border:#1e2d45;--text:#e2e8f0;--text2:#94a3b8;--muted:#64748b;--accent:#38bdf8;--green:#34d399;--amber:#fbbf24}
+        html{scroll-behavior:smooth}
+        body{background:var(--bg);color:var(--text);font-family:'Outfit',ui-sans-serif,system-ui,sans-serif;line-height:1.6;background-image:linear-gradient(rgba(56,189,248,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,0.015) 1px,transparent 1px);background-size:60px 60px}
+        a{color:var(--accent);text-decoration:none}a:hover{color:#7dd3fc}
+        .header{position:sticky;top:0;z-index:100;background:rgba(10,14,23,0.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 24px}
+        .header-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:56px}
+        .logo{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--text)}.logo span{color:var(--accent);font-weight:400}
+        .header-nav{display:flex;gap:20px}.header-nav a{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);transition:color 0.2s}.header-nav a:hover,.header-nav a.active{color:var(--accent)}
+        .container{max-width:800px;margin:0 auto;padding:48px 24px 80px}
+        h1{font-size:clamp(1.8rem,4vw,2.5rem);font-weight:700;letter-spacing:-0.02em;margin-bottom:16px}
+        h2{font-size:1.4rem;font-weight:600;margin-top:48px;margin-bottom:16px}
+        h3{font-size:1.1rem;font-weight:600;margin-top:32px;margin-bottom:12px}
+        p{color:var(--text2);margin-bottom:16px;line-height:1.8;font-size:1.02rem}
+        .lead{font-size:1.15rem;color:var(--text2);font-weight:300;max-width:700px;line-height:1.8;margin-bottom:32px}
+        .chart-guide{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin:24px 0}
+        .chart-guide h3{color:var(--accent);margin-top:0;font-size:1rem;margin-bottom:12px}
+        .chart-guide p{font-size:0.92rem;margin-bottom:10px}
+        .chart-guide p:last-child{margin-bottom:0}
+        .key-table{width:100%;border-collapse:collapse;margin:16px 0}
+        .key-table th,.key-table td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:0.9rem}
+        .key-table th{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.06em}
+        .key-table td{color:var(--text2)}
+        .key-table td:first-child{color:var(--text);font-weight:500}
+        .tip{background:linear-gradient(135deg,rgba(52,211,153,0.06),rgba(56,189,248,0.04));border:1px solid rgba(52,211,153,0.15);border-radius:12px;padding:16px 20px;margin:20px 0}
+        .tip h4{font-size:0.85rem;color:var(--green);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+        .tip p{font-size:0.9rem;margin-bottom:0}
+        .nav-links{display:flex;justify-content:space-between;padding-top:48px;margin-top:48px;border-top:1px solid var(--border)}
+        .nav-links a{font-family:'JetBrains Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:0.04em}
+        .footer{border-top:1px solid var(--border);padding:32px 24px;text-align:center}
+        .footer-inner{max-width:1400px;margin:0 auto}
+        .footer-links{display:flex;flex-wrap:wrap;justify-content:center;gap:24px;margin-bottom:16px}
+        .footer-links a{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted)}.footer-links a:hover{color:var(--accent)}
+        .footer-copy{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+        @media(max-width:768px){.header-nav{display:none}.container{padding:24px 16px 48px}}
+    </style>
+</head>
+<body>
+<div class="header"><div class="header-inner">
+    <a href="/schumann/" class="logo" style="text-decoration:none">Schumann <span>Monitor</span></a>
+    <nav class="header-nav">
+        <a href="/schumann/">Live Data</a>
+        <a href="/schumann/about.html">About</a>
+        <a href="/schumann/science.html" class="active">Science</a>
+        <a href="/schumann/history.html">History</a>
+    </nav>
+</div></div>
+
+<div class="container">
+    <h1>Reading the Charts</h1>
+    <p class="lead">A practical guide to interpreting the live Schumann Resonance monitoring data. Each chart tells part of the story — together they paint a complete picture of Earth's electromagnetic environment.</p>
+
+    <h2>The Spectrogram</h2>
+    <p>The spectrogram is the centerpiece of Schumann monitoring. It's a heat map with three dimensions compressed into two:</p>
+
+    <div class="chart-guide">
+        <h3>Spectrogram axes</h3>
+        <p><strong>Horizontal axis (X):</strong> Time — typically 48 hours, running left (oldest) to right (newest). Timestamps are in Tomsk local time (UTC+7).</p>
+        <p><strong>Vertical axis (Y):</strong> Frequency — from 0 Hz at top to 40 Hz at bottom. The Schumann modes appear as horizontal bands.</p>
+        <p><strong>Color:</strong> Signal power — dark blue = low power, green/yellow = medium, red/white = high power.</p>
+    </div>
+
+    <div class="tip">
+        <h4>What to look for</h4>
+        <p>Clear, steady horizontal bands = normal conditions. Sudden brightening across all frequencies = geomagnetic disturbance. Bands disappearing or blurring = major ionospheric event. White vertical streaks = intense local or global lightning.</p>
+    </div>
+
+    <h2>Amplitude Chart</h2>
+    <p>Shows the signal strength of each Schumann mode over time. Each colored line represents one mode (1st through 5th). The amplitude is measured in picotesla (pT) — a tiny unit of magnetic field strength.</p>
+
+    <div class="chart-guide">
+        <h3>Normal vs. abnormal</h3>
+        <p><strong>Normal:</strong> Smooth daily cycle with amplitude peaking in afternoon (Tomsk time) when Asian/African thunderstorms are most active. The 1st mode is strongest, each subsequent mode is weaker.</p>
+        <p><strong>Abnormal:</strong> Sudden sharp spikes or drops, modes changing relative strength, or loss of the normal daily rhythm. These often correlate with geomagnetic storms (check K-index).</p>
+    </div>
+
+    <h2>Frequency Chart</h2>
+    <p>Tracks the center frequency of each mode. Small fluctuations (±0.2 Hz) are normal. Larger shifts indicate significant changes in the Earth-ionosphere cavity.</p>
+
+    <div class="chart-guide">
+        <h3>Interpreting frequency shifts</h3>
+        <p><strong>Frequency increase:</strong> The effective ionosphere height has decreased (cavity is smaller). Common during solar flares when X-rays push the D-layer lower.</p>
+        <p><strong>Frequency decrease:</strong> The effective ionosphere height has increased. Can occur at night or during ionospheric depletion events.</p>
+        <p><strong>Sudden jump:</strong> A space weather event just changed the ionosphere. Check the solar X-ray flux for a corresponding flare.</p>
+    </div>
+
+    <h2>Quality Factor (Q)</h2>
+    <p>The Q-factor measures how "sharp" each resonance peak is. A high Q means the resonance is well-defined with a narrow peak. A low Q means the peak is broad and smeared.</p>
+
+    <table class="key-table">
+        <tr><th>Q Value</th><th>Meaning</th><th>Typical Cause</th></tr>
+        <tr><td>Q &gt; 6</td><td>Very sharp resonance</td><td>Quiet conditions, stable ionosphere</td></tr>
+        <tr><td>Q = 4–6</td><td>Normal</td><td>Typical day/night conditions</td></tr>
+        <tr><td>Q = 2–4</td><td>Broadened</td><td>Disturbed ionosphere, geomagnetic activity</td></tr>
+        <tr><td>Q &lt; 2</td><td>Severely degraded</td><td>Major geomagnetic storm</td></tr>
+    </table>
+
+    <h2>Ionogram</h2>
+    <p>An ionogram is produced by an ionosonde — a radar that transmits pulses at increasing frequencies straight up and measures what bounces back. The result shows the structure of the ionosphere above the station.</p>
+
+    <div class="chart-guide">
+        <h3>Reading the ionogram</h3>
+        <p><strong>X-axis:</strong> Transmitted frequency (MHz). Left to right = low to high.</p>
+        <p><strong>Y-axis:</strong> Virtual height (km) — the apparent altitude from which the signal was reflected.</p>
+        <p><strong>The trace:</strong> The colored curve shows reflection height vs. frequency. Each "layer" appears as a section where height gradually increases before a sharp jump (critical frequency reached).</p>
+        <p><strong>Key layers:</strong> E-layer (~100 km), F1-layer (~200 km, daytime only), F2-layer (~250–400 km, strongest). The F2 critical frequency (foF2) is the most important parameter for Schumann cavity modeling.</p>
+    </div>
+
+    <h2>K-Index &amp; Geomagnetic Data</h2>
+    <p>The K-index is a quasi-logarithmic scale (0–9) measuring geomagnetic field disturbance over 3-hour intervals.</p>
+
+    <table class="key-table">
+        <tr><th>K-Index</th><th>Level</th><th>Effect on Schumann</th></tr>
+        <tr><td>0–1</td><td>Quiet</td><td>Clean, normal resonance patterns</td></tr>
+        <tr><td>2–3</td><td>Unsettled</td><td>Slight amplitude variations</td></tr>
+        <tr><td>4</td><td>Active</td><td>Noticeable frequency shifts, amplitude changes</td></tr>
+        <tr><td>5–6</td><td>Minor storm</td><td>Significant perturbations, Q-factor drops</td></tr>
+        <tr><td>7–9</td><td>Major/severe storm</td><td>Dramatic changes, modes may split or disappear temporarily</td></tr>
+    </table>
+
+    <h2>Solar X-Ray Flux</h2>
+    <p>The X-ray flux chart from GOES satellites is your early warning system. Solar flares produce bursts of X-rays that reach Earth in 8 minutes and immediately alter the ionosphere's D-layer.</p>
+
+    <div class="chart-guide">
+        <h3>Flare classification</h3>
+        <p><strong>A, B-class:</strong> Background level. No effect on Schumann data.</p>
+        <p><strong>C-class:</strong> Small flare. Minor, usually undetectable effect.</p>
+        <p><strong>M-class:</strong> Medium flare. Causes Sudden Ionospheric Disturbance (SID). Look for frequency shifts in Schumann data ~8 minutes after the flare peak.</p>
+        <p><strong>X-class:</strong> Major flare. Significant ionospheric impact. May cause radio blackouts and clear Schumann anomalies.</p>
+    </div>
+
+    <h2>Coronagraphs (LASCO C2/C3)</h2>
+    <p>Coronagraphs show the solar corona by blocking the bright disk. Their primary purpose for Schumann monitoring is detecting coronal mass ejections (CMEs).</p>
+
+    <div class="tip">
+        <h4>CME alert</h4>
+        <p>If you see an expanding bright structure surrounding the entire occulting disk (a "halo CME"), Earth may be in the firing line. Impact: 1–3 days later, potentially causing a major geomagnetic storm visible in the K-index and Schumann data.</p>
+    </div>
+
+    <h2>Putting It All Together</h2>
+    <p>The charts tell a connected story. Here's a typical sequence during a solar event:</p>
+
+    <div class="chart-guide">
+        <h3>Timeline of a solar event</h3>
+        <p><strong>Hour 0:</strong> X-ray flux spikes (M or X-class flare detected by GOES).</p>
+        <p><strong>Hour 0 + 8 min:</strong> Schumann frequencies shift as the D-layer is suddenly ionized. Amplitude may spike or drop.</p>
+        <p><strong>Hours 1–6:</strong> Check LASCO for CME. If halo CME detected, prepare for geomagnetic impact.</p>
+        <p><strong>Day 1–3:</strong> CME arrives. K-index jumps to 5+. Schumann amplitudes become erratic, Q-factors drop, frequencies shift significantly.</p>
+        <p><strong>Day 3–5:</strong> Recovery. K-index returns to normal. Schumann patterns gradually return to their regular daily rhythm.</p>
+    </div>
+
+    <div class="nav-links">
+        <a href="/schumann/about.html">← About</a>
+        <a href="/schumann/history.html">History →</a>
+    </div>
+</div>
+
+<div class="footer"><div class="footer-inner">
+    <div class="footer-links">
+        <a href="/schumann/">Live Data</a>
+        <a href="/schumann/about.html">What is Schumann Resonance?</a>
+        <a href="/schumann/science.html">Reading the Charts</a>
+        <a href="/schumann/history.html">Discovery History</a>
+    </div>
+    <div class="footer-copy">Schumann Resonance Monitor · <a href="https://github.com/Siamsnus/schumann">Source on GitHub</a></div>
+</div></div>
+</body>
+</html>
