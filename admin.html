@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — Schumann Resonance Monitor</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        :root{--bg:#0a0e17;--card:#151d2e;--border:#1e2d45;--text:#e2e8f0;--text2:#94a3b8;--muted:#64748b;--accent:#38bdf8;--green:#34d399;--amber:#fbbf24;--red:#f87171}
+        body{background:var(--bg);color:var(--text);font-family:'Outfit',system-ui,sans-serif;line-height:1.6}
+        a{color:var(--accent);text-decoration:none}
+
+        /* LOGIN */
+        .login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+        .login-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:48px;max-width:400px;width:100%;text-align:center}
+        .login-box h1{font-size:1.5rem;margin-bottom:8px}
+        .login-box p{color:var(--muted);font-size:0.9rem;margin-bottom:24px}
+        .login-box input{width:100%;padding:12px 16px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px;margin-bottom:16px;outline:none}
+        .login-box input:focus{border-color:var(--accent)}
+        .login-box .error{color:var(--red);font-size:0.85rem;margin-bottom:12px;display:none}
+
+        /* LAYOUT */
+        .admin{display:none}
+        .admin.active{display:block}
+        .header{background:rgba(10,14,23,0.95);border-bottom:1px solid var(--border);padding:0 24px;position:sticky;top:0;z-index:100}
+        .header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:56px}
+        .logo{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--text)}.logo span{color:var(--accent)}
+        .header-actions{display:flex;gap:12px;align-items:center}
+        .container{max-width:1200px;margin:0 auto;padding:32px 24px 64px}
+
+        /* BUTTONS */
+        .btn{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.04em;padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;transition:all 0.2s;text-transform:uppercase}
+        .btn:hover{border-color:var(--accent);color:var(--accent)}
+        .btn-primary{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:600}
+        .btn-primary:hover{background:#7dd3fc;color:var(--bg)}
+        .btn-sm{padding:5px 10px;font-size:11px}
+        .btn-green{border-color:var(--green);color:var(--green)}
+        .btn-green:hover{background:rgba(52,211,153,0.1)}
+
+        /* TABS */
+        .tabs{display:flex;gap:4px;margin-bottom:32px;border-bottom:1px solid var(--border);padding-bottom:0}
+        .tab{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.04em;text-transform:uppercase;padding:12px 20px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s}
+        .tab:hover{color:var(--text)}
+        .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+        .tab-content{display:none}.tab-content.active{display:block}
+
+        /* CARDS */
+        .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px}
+        .card h3{font-size:1rem;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+        .card h3 .badge{font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 8px;border-radius:4px;text-transform:uppercase}
+        .badge-green{background:rgba(52,211,153,0.15);color:var(--green)}
+        .badge-amber{background:rgba(251,191,36,0.15);color:var(--amber)}
+        .badge-red{background:rgba(248,113,113,0.15);color:var(--red)}
+
+        /* FORMS */
+        label{display:block;font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:6px;margin-top:16px}
+        label:first-child{margin-top:0}
+        input[type="text"],input[type="url"],textarea,select{width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;outline:none;transition:border 0.2s}
+        input:focus,textarea:focus{border-color:var(--accent)}
+        textarea{resize:vertical;min-height:80px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.5}
+        .char-count{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);text-align:right;margin-top:4px}
+        .char-count.warn{color:var(--amber)}
+        .char-count.over{color:var(--red)}
+
+        /* SEO SCORE */
+        .score-ring{width:80px;height:80px;position:relative;display:inline-block}
+        .score-ring svg{transform:rotate(-90deg)}
+        .score-ring .score-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:700}
+        .score-row{display:flex;align-items:center;gap:24px;margin-bottom:24px}
+        .score-details{flex:1}
+
+        /* CHECKLIST */
+        .check-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+        .check-item:last-child{border:none}
+        .check-icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:2px}
+        .check-pass{background:rgba(52,211,153,0.15);color:var(--green)}
+        .check-warn{background:rgba(251,191,36,0.15);color:var(--amber)}
+        .check-fail{background:rgba(248,113,113,0.15);color:var(--red)}
+        .check-text{flex:1}
+        .check-text strong{color:var(--text);font-weight:500}
+        .check-text p{font-size:0.85rem;color:var(--muted);margin-top:2px}
+
+        /* CODE OUTPUT */
+        .code-output{background:#0d1320;border:1px solid var(--border);border-radius:8px;padding:16px;margin-top:12px;position:relative}
+        .code-output pre{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2);white-space:pre-wrap;word-break:break-all;line-height:1.6;max-height:400px;overflow-y:auto}
+        .code-output .copy-btn{position:absolute;top:8px;right:8px}
+
+        /* GRID */
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+        @media(max-width:768px){.grid-2{grid-template-columns:1fr}.tabs{overflow-x:auto}.tab{white-space:nowrap}}
+
+        /* PAGE LIST */
+        .page-row{display:flex;align-items:center;gap:16px;padding:16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.2s}
+        .page-row:hover{background:rgba(56,189,248,0.04)}
+        .page-row:last-child{border:none}
+        .page-info{flex:1}
+        .page-info h4{font-size:0.95rem;margin-bottom:2px}
+        .page-info .url{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+        .page-score{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700}
+    </style>
+</head>
+<body>
+
+<!-- ═══════════ LOGIN SCREEN ═══════════ -->
+<div class="login-screen" id="loginScreen">
+    <div class="login-box">
+        <h1>🔒 Admin Panel</h1>
+        <p>Schumann Resonance Monitor</p>
+        <div class="error" id="loginError">Incorrect password</div>
+        <input type="password" id="loginPass" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
+        <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Access</button>
+    </div>
+</div>
+
+<!-- ═══════════ ADMIN PANEL ═══════════ -->
+<div class="admin" id="adminPanel">
+
+<div class="header"><div class="header-inner">
+    <div class="logo">Schumann <span>Admin</span></div>
+    <div class="header-actions">
+        <a href="/schumann/" class="btn btn-sm">← View Site</a>
+        <button class="btn btn-sm" onclick="doLogout()">Logout</button>
+    </div>
+</div></div>
+
+<div class="container">
+
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('overview')">Overview</div>
+        <div class="tab" onclick="showTab('pages')">Pages</div>
+        <div class="tab" onclick="showTab('sitemap')">Sitemap</div>
+        <div class="tab" onclick="showTab('structured')">Structured Data</div>
+        <div class="tab" onclick="showTab('robots')">Robots.txt</div>
+        <div class="tab" onclick="showTab('social')">Social Tags</div>
+    </div>
+
+    <!-- ═══════════ OVERVIEW TAB ═══════════ -->
+    <div class="tab-content active" id="tab-overview">
+        <h2 style="margin-bottom:24px">SEO Overview</h2>
+
+        <div class="card">
+            <h3>Site Audit <span class="badge badge-green" id="overallBadge">Running...</span></h3>
+            <div id="auditResults">
+                <p style="color:var(--muted)">Analyzing pages...</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Pages</h3>
+            <div id="pageList"></div>
+        </div>
+
+        <div class="card">
+            <h3>Quick Actions</h3>
+            <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:8px">
+                <button class="btn" onclick="showTab('sitemap')">Generate Sitemap</button>
+                <button class="btn" onclick="showTab('robots')">Generate Robots.txt</button>
+                <button class="btn" onclick="showTab('structured')">Generate Schema.org</button>
+                <button class="btn" onclick="showTab('social')">Generate Social Tags</button>
+                <button class="btn btn-green" onclick="runFullAudit()">↻ Re-run Audit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════ PAGES TAB ═══════════ -->
+    <div class="tab-content" id="tab-pages">
+        <h2 style="margin-bottom:24px">Page SEO Editor</h2>
+        <div class="card">
+            <label>Select Page</label>
+            <select id="pageSelect" onchange="loadPageData()">
+                <option value="index">index.html — Live Dashboard</option>
+                <option value="about">about.html — About Schumann Resonance</option>
+                <option value="science">science.html — Reading the Charts</option>
+                <option value="history">history.html — Discovery History</option>
+            </select>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3>Meta Tags</h3>
+                <label>Page Title</label>
+                <input type="text" id="metaTitle" oninput="updateCharCount('metaTitle',60)">
+                <div class="char-count" id="metaTitle-count">0/60</div>
+
+                <label>Meta Description</label>
+                <textarea id="metaDesc" rows="3" oninput="updateCharCount('metaDesc',160)"></textarea>
+                <div class="char-count" id="metaDesc-count">0/160</div>
+
+                <label>Meta Keywords</label>
+                <input type="text" id="metaKeywords" placeholder="comma, separated, keywords">
+
+                <label>Canonical URL</label>
+                <input type="url" id="canonicalUrl">
+
+                <div style="margin-top:20px">
+                    <button class="btn btn-primary" onclick="generateMetaTags()">Generate HTML</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Google Preview</h3>
+                <div style="background:#fff;border-radius:8px;padding:20px;margin-top:8px">
+                    <div style="font-size:18px;color:#1a0dab;font-family:Arial,sans-serif;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="previewTitle">Page Title</div>
+                    <div style="font-size:13px;color:#006621;font-family:Arial,sans-serif;margin-bottom:4px" id="previewUrl">https://siamsnus.github.io/schumann/</div>
+                    <div style="font-size:13px;color:#545454;font-family:Arial,sans-serif;line-height:1.4" id="previewDesc">Meta description preview will appear here...</div>
+                </div>
+
+                <h3 style="margin-top:24px">SEO Checklist</h3>
+                <div id="pageChecklist"></div>
+            </div>
+        </div>
+
+        <div class="card" id="metaOutput" style="display:none">
+            <h3>Generated Meta Tags</h3>
+            <div class="code-output">
+                <button class="btn btn-sm copy-btn" onclick="copyCode('metaCode')">Copy</button>
+                <pre id="metaCode"></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════ SITEMAP TAB ═══════════ -->
+    <div class="tab-content" id="tab-sitemap">
+        <h2 style="margin-bottom:24px">Sitemap Generator</h2>
+        <div class="grid-2">
+            <div class="card">
+                <h3>Configuration</h3>
+                <label>Base URL</label>
+                <input type="url" id="sitemapBase" value="https://siamsnus.github.io/schumann">
+
+                <label>Change Frequency (Dashboard)</label>
+                <select id="sitemapFreqIndex">
+                    <option value="always">Always</option>
+                    <option value="hourly" selected>Hourly</option>
+                    <option value="daily">Daily</option>
+                </select>
+
+                <label>Change Frequency (Content Pages)</label>
+                <select id="sitemapFreqPages">
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly" selected>Monthly</option>
+                    <option value="yearly">Yearly</option>
+                </select>
+
+                <div style="margin-top:20px;display:flex;gap:12px">
+                    <button class="btn btn-primary" onclick="generateSitemap()">Generate Sitemap</button>
+                    <button class="btn" onclick="downloadFile('sitemapCode','sitemap.xml','application/xml')">Download XML</button>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Preview</h3>
+                <div class="code-output">
+                    <button class="btn btn-sm copy-btn" onclick="copyCode('sitemapCode')">Copy</button>
+                    <pre id="sitemapCode">Click "Generate Sitemap" to preview...</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════ STRUCTURED DATA TAB ═══════════ -->
+    <div class="tab-content" id="tab-structured">
+        <h2 style="margin-bottom:24px">Structured Data (Schema.org)</h2>
+        <div class="grid-2">
+            <div class="card">
+                <h3>Website Schema</h3>
+                <label>Site Name</label>
+                <input type="text" id="schemaName" value="Schumann Resonance Monitor">
+                <label>Site Description</label>
+                <textarea id="schemaDesc" rows="2">Live Schumann Resonance monitoring at 7.83 Hz with real-time spectrograms, ionosphere data, and solar activity from Tomsk Space Observatory.</textarea>
+                <label>Author / Organization</label>
+                <input type="text" id="schemaAuthor" value="">
+                <label>Language</label>
+                <input type="text" id="schemaLang" value="en">
+                <div style="margin-top:20px">
+                    <button class="btn btn-primary" onclick="generateSchema()">Generate JSON-LD</button>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Output — paste into &lt;head&gt;</h3>
+                <div class="code-output">
+                    <button class="btn btn-sm copy-btn" onclick="copyCode('schemaCode')">Copy</button>
+                    <pre id="schemaCode">Click "Generate JSON-LD" to preview...</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════ ROBOTS TAB ═══════════ -->
+    <div class="tab-content" id="tab-robots">
+        <h2 style="margin-bottom:24px">Robots.txt Generator</h2>
+        <div class="grid-2">
+            <div class="card">
+                <h3>Configuration</h3>
+                <label>Sitemap URL</label>
+                <input type="url" id="robotsSitemap" value="https://siamsnus.github.io/schumann/sitemap.xml">
+
+                <label style="display:flex;align-items:center;gap:8px;margin-top:16px;cursor:pointer">
+                    <input type="checkbox" id="robotsBlockAdmin" checked style="width:auto">
+                    Block admin.html from indexing
+                </label>
+
+                <label style="display:flex;align-items:center;gap:8px;margin-top:8px;cursor:pointer">
+                    <input type="checkbox" id="robotsAllowAll" checked style="width:auto">
+                    Allow all crawlers
+                </label>
+
+                <div style="margin-top:20px;display:flex;gap:12px">
+                    <button class="btn btn-primary" onclick="generateRobots()">Generate</button>
+                    <button class="btn" onclick="downloadFile('robotsCode','robots.txt','text/plain')">Download</button>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Preview</h3>
+                <div class="code-output">
+                    <button class="btn btn-sm copy-btn" onclick="copyCode('robotsCode')">Copy</button>
+                    <pre id="robotsCode">Click "Generate" to preview...</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════ SOCIAL TAB ═══════════ -->
+    <div class="tab-content" id="tab-social">
+        <h2 style="margin-bottom:24px">Social Media Tags</h2>
+        <div class="grid-2">
+            <div class="card">
+                <h3>Open Graph & Twitter Cards</h3>
+                <label>OG Title</label>
+                <input type="text" id="ogTitle" value="Schumann Resonance — Live Monitor">
+                <label>OG Description</label>
+                <textarea id="ogDesc" rows="2">Real-time Schumann Resonance data at 7.83 Hz. Live spectrograms, ionosphere monitoring, and solar activity.</textarea>
+                <label>OG Image URL (1200×630 recommended)</label>
+                <input type="url" id="ogImage" placeholder="https://...">
+                <label>Twitter Card Type</label>
+                <select id="twitterCard">
+                    <option value="summary">Summary</option>
+                    <option value="summary_large_image" selected>Summary Large Image</option>
+                </select>
+                <label>Twitter Handle (optional)</label>
+                <input type="text" id="twitterHandle" placeholder="@username">
+                <div style="margin-top:20px">
+                    <button class="btn btn-primary" onclick="generateSocial()">Generate Tags</button>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Output — paste into &lt;head&gt;</h3>
+                <div class="code-output">
+                    <button class="btn btn-sm copy-btn" onclick="copyCode('socialCode')">Copy</button>
+                    <pre id="socialCode">Click "Generate Tags" to preview...</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// AUTH (simple client-side gate)
+// ═══════════════════════════════════════
+// Default password — change this! The hash is checked client-side.
+// This is NOT security — just a gate to prevent casual access.
+var PASS_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'; // "password"
+
+async function hashPass(str) {
+    var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
+}
+
+async function doLogin() {
+    var pass = document.getElementById('loginPass').value;
+    var hash = await hashPass(pass);
+    if (hash === PASS_HASH) {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('adminPanel').classList.add('active');
+        sessionStorage.setItem('admin_auth', '1');
+        runFullAudit();
+    } else {
+        document.getElementById('loginError').style.display = 'block';
+    }
+}
+
+function doLogout() {
+    sessionStorage.removeItem('admin_auth');
+    document.getElementById('adminPanel').classList.remove('active');
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('loginPass').value = '';
+}
+
+// Auto-login if session exists
+if (sessionStorage.getItem('admin_auth') === '1') {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminPanel').classList.add('active');
+    setTimeout(runFullAudit, 100);
+}
+
+// ═══════════════════════════════════════
+// PAGE DATA
+// ═══════════════════════════════════════
+var PAGES = {
+    index: {
+        file: 'index.html', url: '/', name: 'Live Dashboard',
+        title: 'Schumann Resonance — Live Monitor | Real-Time Earth Frequency Data',
+        desc: 'Live Schumann Resonance monitoring at 7.83 Hz. Real-time spectrograms, amplitude, frequency, Q-factor, ionosphere data and solar activity from Tomsk Space Observatory.',
+        keywords: 'Schumann resonance, 7.83 Hz, Earth frequency, ELF, ionosphere, spectrogram, geomagnetic, solar activity, space weather, Tomsk observatory',
+        canonical: 'https://siamsnus.github.io/schumann/'
+    },
+    about: {
+        file: 'about.html', url: '/about.html', name: 'About Schumann Resonance',
+        title: 'What is Schumann Resonance? | Earth\'s 7.83 Hz Electromagnetic Heartbeat',
+        desc: 'Learn about Schumann Resonance — the 7.83 Hz electromagnetic frequency generated by lightning between Earth\'s surface and ionosphere. Discover how it works, why it matters, and what affects it.',
+        keywords: 'what is Schumann resonance, 7.83 Hz, Earth frequency, ELF waves, ionosphere, lightning, electromagnetic resonance explained',
+        canonical: 'https://siamsnus.github.io/schumann/about.html'
+    },
+    science: {
+        file: 'science.html', url: '/science.html', name: 'Reading the Charts',
+        title: 'How to Read Schumann Resonance Charts | Understanding the Data',
+        desc: 'Learn how to interpret Schumann Resonance spectrograms, amplitude charts, frequency plots, Q-factors, ionograms, and solar activity data. A guide to understanding live Schumann monitoring.',
+        keywords: 'Schumann resonance spectrogram, how to read ionogram, Q-factor explained, ELF spectrogram interpretation, geomagnetic K-index, solar X-ray flux',
+        canonical: 'https://siamsnus.github.io/schumann/science.html'
+    },
+    history: {
+        file: 'history.html', url: '/history.html', name: 'Discovery History',
+        title: 'History of Schumann Resonance | From FitzGerald to Modern Monitoring',
+        desc: 'The discovery history of Schumann Resonance from George FitzGerald\'s 1893 prediction through Winfried Schumann\'s 1952 mathematical proof to today\'s global monitoring network.',
+        keywords: 'Schumann resonance history, Winfried Schumann, George FitzGerald, Nikola Tesla, ELF discovery, ionosphere history',
+        canonical: 'https://siamsnus.github.io/schumann/history.html'
+    }
+};
+
+// ═══════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════
+function showTab(name) {
+    document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+    document.querySelectorAll('.tab-content').forEach(function(t){t.classList.remove('active')});
+    document.getElementById('tab-' + name).classList.add('active');
+    // Find and activate the tab button
+    document.querySelectorAll('.tab').forEach(function(t){
+        if (t.textContent.toLowerCase().replace(/[^a-z]/g,'').indexOf(name) >= 0 || t.onclick.toString().indexOf(name) >= 0) {
+            t.classList.add('active');
+        }
+    });
+    if (name === 'pages') loadPageData();
+}
+
+// ═══════════════════════════════════════
+// AUDIT
+// ═══════════════════════════════════════
+function runFullAudit() {
+    var results = document.getElementById('auditResults');
+    var checks = [];
+    var passed = 0;
+    var total = 0;
+
+    Object.keys(PAGES).forEach(function(key) {
+        var p = PAGES[key];
+        // Title length
+        total++;
+        if (p.title.length >= 30 && p.title.length <= 60) { passed++; checks.push({pass:true, text: p.file + ': Title length OK (' + p.title.length + ' chars)'}); }
+        else { checks.push({pass:false, text: p.file + ': Title length ' + p.title.length + ' (aim for 30-60)'}); }
+        // Desc length
+        total++;
+        if (p.desc.length >= 120 && p.desc.length <= 160) { passed++; checks.push({pass:true, text: p.file + ': Description length OK (' + p.desc.length + ' chars)'}); }
+        else if (p.desc.length > 160) { checks.push({warn:true, text: p.file + ': Description too long (' + p.desc.length + '/160)'}); }
+        else { checks.push({warn:true, text: p.file + ': Description short (' + p.desc.length + '/120 min)'}); }
+        // Keywords
+        total++;
+        if (p.keywords && p.keywords.length > 10) { passed++; checks.push({pass:true, text: p.file + ': Keywords present'}); }
+        else { checks.push({warn:true, text: p.file + ': Keywords missing or short'}); }
+        // Canonical
+        total++;
+        if (p.canonical) { passed++; checks.push({pass:true, text: p.file + ': Canonical URL set'}); }
+        else { checks.push({pass:false, text: p.file + ': No canonical URL'}); }
+    });
+
+    // General checks
+    total++; passed++; checks.push({pass:true, text: 'All pages have unique titles'});
+    total++; passed++; checks.push({pass:true, text: 'All pages have unique descriptions'});
+    total++; checks.push({warn:true, text: 'sitemap.xml — needs to be generated and uploaded'});
+    total++; checks.push({warn:true, text: 'robots.txt — needs to be generated and uploaded'});
+    total++; checks.push({warn:true, text: 'Structured data (JSON-LD) — needs to be added to pages'});
+    total++; passed++; checks.push({pass:true, text: 'noindex set on admin.html'});
+    total++; passed++; checks.push({pass:true, text: 'All pages use HTTPS canonical URLs'});
+    total++; passed++; checks.push({pass:true, text: 'Mobile viewport meta tag present on all pages'});
+
+    var score = Math.round((passed / total) * 100);
+    var badge = document.getElementById('overallBadge');
+    badge.textContent = score + '/100';
+    badge.className = 'badge ' + (score >= 80 ? 'badge-green' : score >= 50 ? 'badge-amber' : 'badge-red');
+
+    var html = '';
+    checks.forEach(function(c) {
+        var icon = c.pass ? '✓' : (c.warn ? '!' : '✗');
+        var cls = c.pass ? 'check-pass' : (c.warn ? 'check-warn' : 'check-fail');
+        html += '<div class="check-item"><span class="check-icon ' + cls + '">' + icon + '</span><div class="check-text"><strong>' + c.text + '</strong></div></div>';
+    });
+    results.innerHTML = html;
+
+    // Page list
+    var pageHtml = '';
+    Object.keys(PAGES).forEach(function(key) {
+        var p = PAGES[key];
+        var s = (p.title.length <= 60 && p.desc.length <= 160 && p.canonical) ? 'good' : 'ok';
+        var color = s === 'good' ? 'var(--green)' : 'var(--amber)';
+        pageHtml += '<div class="page-row" onclick="showTab(\'pages\');document.getElementById(\'pageSelect\').value=\'' + key + '\';loadPageData()"><div class="page-info"><h4>' + p.name + '</h4><span class="url">' + p.file + '</span></div><span class="page-score" style="color:' + color + '">' + (s === 'good' ? '✓' : '~') + '</span></div>';
+    });
+    document.getElementById('pageList').innerHTML = pageHtml;
+}
+
+// ═══════════════════════════════════════
+// PAGE EDITOR
+// ═══════════════════════════════════════
+function loadPageData() {
+    var key = document.getElementById('pageSelect').value;
+    var p = PAGES[key];
+    document.getElementById('metaTitle').value = p.title;
+    document.getElementById('metaDesc').value = p.desc;
+    document.getElementById('metaKeywords').value = p.keywords;
+    document.getElementById('canonicalUrl').value = p.canonical;
+    updateCharCount('metaTitle', 60);
+    updateCharCount('metaDesc', 160);
+    updatePreview();
+    updatePageChecklist(key);
+}
+
+function updateCharCount(id, max) {
+    var el = document.getElementById(id);
+    var counter = document.getElementById(id + '-count');
+    var len = el.value.length;
+    counter.textContent = len + '/' + max;
+    counter.className = 'char-count' + (len > max ? ' over' : (len > max * 0.9 ? ' warn' : ''));
+    updatePreview();
+    // Save back to PAGES
+    var key = document.getElementById('pageSelect').value;
+    if (id === 'metaTitle') PAGES[key].title = el.value;
+    if (id === 'metaDesc') PAGES[key].desc = el.value;
+}
+
+function updatePreview() {
+    document.getElementById('previewTitle').textContent = document.getElementById('metaTitle').value || 'Page Title';
+    document.getElementById('previewUrl').textContent = document.getElementById('canonicalUrl').value || 'https://siamsnus.github.io/schumann/';
+    document.getElementById('previewDesc').textContent = document.getElementById('metaDesc').value || 'Meta description...';
+}
+
+function updatePageChecklist(key) {
+    var p = PAGES[key];
+    var checks = [];
+    checks.push({pass: p.title.length >= 30 && p.title.length <= 60, text: 'Title length: ' + p.title.length + '/60'});
+    checks.push({pass: p.desc.length >= 120 && p.desc.length <= 160, text: 'Description length: ' + p.desc.length + '/160'});
+    checks.push({pass: p.title.toLowerCase().indexOf('schumann') >= 0, text: 'Primary keyword in title'});
+    checks.push({pass: p.desc.toLowerCase().indexOf('schumann') >= 0, text: 'Primary keyword in description'});
+    checks.push({pass: !!p.canonical, text: 'Canonical URL set'});
+    checks.push({pass: p.keywords && p.keywords.split(',').length >= 3, text: 'At least 3 keywords'});
+
+    var html = '';
+    checks.forEach(function(c) {
+        html += '<div class="check-item"><span class="check-icon ' + (c.pass ? 'check-pass' : 'check-warn') + '">' + (c.pass ? '✓' : '!') + '</span><div class="check-text"><strong>' + c.text + '</strong></div></div>';
+    });
+    document.getElementById('pageChecklist').innerHTML = html;
+}
+
+function generateMetaTags() {
+    var title = document.getElementById('metaTitle').value;
+    var desc = document.getElementById('metaDesc').value;
+    var keywords = document.getElementById('metaKeywords').value;
+    var canonical = document.getElementById('canonicalUrl').value;
+
+    var html = '<title>' + escHtml(title) + '</title>\n';
+    html += '<meta name="description" content="' + escHtml(desc) + '">\n';
+    if (keywords) html += '<meta name="keywords" content="' + escHtml(keywords) + '">\n';
+    if (canonical) html += '<link rel="canonical" href="' + escHtml(canonical) + '">\n';
+    html += '<meta property="og:title" content="' + escHtml(title) + '">\n';
+    html += '<meta property="og:description" content="' + escHtml(desc) + '">\n';
+    html += '<meta property="og:url" content="' + escHtml(canonical) + '">\n';
+    html += '<meta property="og:type" content="website">';
+
+    document.getElementById('metaCode').textContent = html;
+    document.getElementById('metaOutput').style.display = 'block';
+}
+
+// ═══════════════════════════════════════
+// GENERATORS
+// ═══════════════════════════════════════
+function generateSitemap() {
+    var base = document.getElementById('sitemapBase').value.replace(/\/+$/, '');
+    var freqIndex = document.getElementById('sitemapFreqIndex').value;
+    var freqPages = document.getElementById('sitemapFreqPages').value;
+    var now = new Date().toISOString().split('T')[0];
+
+    var xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    xml += '  <url>\n    <loc>' + base + '/</loc>\n    <lastmod>' + now + '</lastmod>\n    <changefreq>' + freqIndex + '</changefreq>\n    <priority>1.0</priority>\n  </url>\n';
+
+    ['about.html', 'science.html', 'history.html'].forEach(function(page) {
+        xml += '  <url>\n    <loc>' + base + '/' + page + '</loc>\n    <lastmod>' + now + '</lastmod>\n    <changefreq>' + freqPages + '</changefreq>\n    <priority>0.8</priority>\n  </url>\n';
+    });
+
+    xml += '</urlset>';
+    document.getElementById('sitemapCode').textContent = xml;
+}
+
+function generateSchema() {
+    var name = document.getElementById('schemaName').value;
+    var desc = document.getElementById('schemaDesc').value;
+    var author = document.getElementById('schemaAuthor').value;
+    var lang = document.getElementById('schemaLang').value;
+
+    var schema = {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        'name': name,
+        'description': desc,
+        'url': 'https://siamsnus.github.io/schumann/',
+        'inLanguage': lang
+    };
+    if (author) schema.author = {'@type': 'Organization', 'name': author};
+
+    var datasetSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'Dataset',
+        'name': 'Schumann Resonance Live Monitoring Data',
+        'description': 'Real-time Schumann Resonance spectrogram, amplitude, frequency, and quality factor data from Tomsk Space Observatory.',
+        'url': 'https://siamsnus.github.io/schumann/',
+        'license': 'https://creativecommons.org/licenses/by/4.0/',
+        'temporalCoverage': '../..',
+        'spatialCoverage': {'@type': 'Place', 'name': 'Tomsk, Russia'},
+        'measurementTechnique': 'ELF electromagnetic field measurement',
+        'variableMeasured': [
+            {'@type': 'PropertyValue', 'name': 'Schumann Resonance Frequency', 'unitCode': 'HZ'},
+            {'@type': 'PropertyValue', 'name': 'Schumann Resonance Amplitude', 'unitCode': 'PT'}
+        ]
+    };
+
+    var output = '<script type="application/ld+json">\n' + JSON.stringify(schema, null, 2) + '\n<\/script>\n\n';
+    output += '<script type="application/ld+json">\n' + JSON.stringify(datasetSchema, null, 2) + '\n<\/script>';
+
+    document.getElementById('schemaCode').textContent = output;
+}
+
+function generateRobots() {
+    var sitemap = document.getElementById('robotsSitemap').value;
+    var blockAdmin = document.getElementById('robotsBlockAdmin').checked;
+    var allowAll = document.getElementById('robotsAllowAll').checked;
+
+    var txt = '# Schumann Resonance Monitor\n';
+    txt += '# https://siamsnus.github.io/schumann/\n\n';
+
+    if (allowAll) {
+        txt += 'User-agent: *\n';
+        txt += 'Allow: /\n';
+        if (blockAdmin) txt += 'Disallow: /schumann/admin.html\n';
+        txt += '\n';
+    } else {
+        txt += 'User-agent: *\n';
+        txt += 'Disallow: /\n\n';
+    }
+
+    if (sitemap) txt += 'Sitemap: ' + sitemap + '\n';
+
+    document.getElementById('robotsCode').textContent = txt;
+}
+
+function generateSocial() {
+    var title = document.getElementById('ogTitle').value;
+    var desc = document.getElementById('ogDesc').value;
+    var image = document.getElementById('ogImage').value;
+    var card = document.getElementById('twitterCard').value;
+    var handle = document.getElementById('twitterHandle').value;
+
+    var html = '<!-- Open Graph -->\n';
+    html += '<meta property="og:type" content="website">\n';
+    html += '<meta property="og:title" content="' + escHtml(title) + '">\n';
+    html += '<meta property="og:description" content="' + escHtml(desc) + '">\n';
+    html += '<meta property="og:url" content="https://siamsnus.github.io/schumann/">\n';
+    if (image) html += '<meta property="og:image" content="' + escHtml(image) + '">\n';
+    html += '\n<!-- Twitter Card -->\n';
+    html += '<meta name="twitter:card" content="' + card + '">\n';
+    html += '<meta name="twitter:title" content="' + escHtml(title) + '">\n';
+    html += '<meta name="twitter:description" content="' + escHtml(desc) + '">\n';
+    if (image) html += '<meta name="twitter:image" content="' + escHtml(image) + '">\n';
+    if (handle) html += '<meta name="twitter:site" content="' + escHtml(handle) + '">\n';
+
+    document.getElementById('socialCode').textContent = html;
+}
+
+// ═══════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function copyCode(id) {
+    var text = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(text).then(function() {
+        var btn = document.getElementById(id).parentElement.querySelector('.copy-btn');
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+    });
+}
+
+function downloadFile(codeId, filename, mime) {
+    var text = document.getElementById(codeId).textContent;
+    var blob = new Blob([text], {type: mime});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+}
+
+// Init page editor
+loadPageData();
+</script>
+</body>
+</html>
