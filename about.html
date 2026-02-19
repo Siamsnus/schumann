@@ -9,17 +9,18 @@
     <link rel="canonical" href="https://siamsnus.github.io/schumann/about.html">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
     <style>
         *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-        :root{--bg:#0a0e17;--card:#151d2e;--border:#1e2d45;--text:#e2e8f0;--text2:#94a3b8;--muted:#64748b;--accent:#38bdf8;--green:#34d399}
+        :root{--bg:#0a0e17;--card:#151d2e;--border:#1e2d45;--text:#e2e8f0;--text2:#a8b8cc;--muted:#8294ab;--accent:#38bdf8;--green:#34d399}
         html{scroll-behavior:smooth}
         body{background:var(--bg);color:var(--text);font-family:'Outfit',ui-sans-serif,system-ui,sans-serif;line-height:1.6;background-image:linear-gradient(rgba(56,189,248,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,0.015) 1px,transparent 1px);background-size:60px 60px}
-        a{color:var(--accent);text-decoration:none}a:hover{color:#7dd3fc}
+        a{color:var(--accent);text-decoration:underline;text-decoration-color:rgba(56,189,248,0.3);text-underline-offset:2px}a:hover{color:#7dd3fc}
         .header{position:sticky;top:0;z-index:100;background:rgba(10,14,23,0.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 24px}
         .header-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:56px}
         .logo{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--text)}.logo span{color:var(--accent);font-weight:400}
-        .header-nav{display:flex;gap:20px}.header-nav a{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);transition:color 0.2s}.header-nav a:hover,.header-nav a.active{color:var(--accent)}
+        .header-nav{display:flex;gap:20px}.header-nav a{text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);transition:color 0.2s}.header-nav a:hover,.header-nav a.active{color:var(--accent)}
         .container{max-width:800px;margin:0 auto;padding:48px 24px 80px}
         h1{font-size:clamp(1.8rem,4vw,2.5rem);font-weight:700;letter-spacing:-0.02em;margin-bottom:16px}
         h1 .hz{color:var(--accent);font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.7em}
@@ -38,17 +39,17 @@
         blockquote{border-left:3px solid var(--accent);padding:16px 24px;margin:24px 0;background:rgba(56,189,248,0.04);border-radius:0 8px 8px 0}
         blockquote p{color:var(--text);font-style:italic;margin-bottom:0}
         .nav-links{display:flex;justify-content:space-between;padding-top:48px;margin-top:48px;border-top:1px solid var(--border)}
-        .nav-links a{font-family:'JetBrains Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:0.04em}
+        .nav-links a{text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:0.04em}
         .footer{border-top:1px solid var(--border);padding:32px 24px;text-align:center}
         .footer-inner{max-width:1400px;margin:0 auto}
         .footer-links{display:flex;flex-wrap:wrap;justify-content:center;gap:24px;margin-bottom:16px}
-        .footer-links a{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted)}.footer-links a:hover{color:var(--accent)}
+        .footer-links a{text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted)}.footer-links a:hover{color:var(--accent)}
         .footer-copy{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
         .hamburger{display:none;background:none;border:none;cursor:pointer;padding:8px;margin-right:-8px}
         .hamburger svg{width:24px;height:24px;stroke:var(--text);stroke-width:2;stroke-linecap:round}
         .mobile-menu{display:none;position:fixed;inset:0;background:rgba(10,14,23,0.98);z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:32px}
         .mobile-menu.open{display:flex}
-        .mobile-menu a{font-family:'JetBrains Mono',monospace;font-size:16px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);padding:12px 24px}
+        .mobile-menu a{text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:16px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);padding:12px 24px}
         .mobile-menu a:hover,.mobile-menu a.active{color:var(--accent)}
         .mobile-menu .close-menu{position:absolute;top:16px;right:20px;background:none;border:none;cursor:pointer;padding:8px}
         .mobile-menu .close-menu svg{width:28px;height:28px;stroke:var(--text);stroke-width:2;stroke-linecap:round}
@@ -78,6 +79,7 @@
     <a href="/schumann/history.html">History</a>
 </div>
 
+<main>
 <div class="container">
     <h1>What is Schumann Resonance? <span class="hz">7.83 Hz</span></h1>
     <p class="lead">Schumann resonances are a set of electromagnetic frequencies generated by lightning discharges in the cavity formed between Earth's surface and the ionosphere. The fundamental frequency, approximately 7.83 Hz, is sometimes called "Earth's heartbeat."</p>
@@ -147,6 +149,7 @@
     </div>
 </div>
 
+</main>
 <div class="footer"><div class="footer-inner">
     <div class="footer-links">
         <a href="/schumann/">Live Data</a>
