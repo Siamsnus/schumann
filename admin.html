@@ -91,7 +91,7 @@
 
         /* GRID */
         .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-        @media(max-width:768px){.grid-2{grid-template-columns:1fr}.tabs{overflow-x:auto}.tab{white-space:nowrap}}
+        @media(max-width:768px){.grid-2{grid-template-columns:1fr}.tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:1px}.tabs::-webkit-scrollbar{display:none}.tab{white-space:nowrap;padding:12px 14px;font-size:11px}.container{padding:20px 16px 48px}.card{padding:18px}.login-box{padding:32px 24px}label{font-size:10px}input[type="text"],input[type="url"],textarea,select{font-size:16px}}
 
         /* PAGE LIST */
         .page-row{display:flex;align-items:center;gap:16px;padding:16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.2s}

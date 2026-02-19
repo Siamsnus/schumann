@@ -45,7 +45,15 @@
         .footer-links{display:flex;flex-wrap:wrap;justify-content:center;gap:24px;margin-bottom:16px}
         .footer-links a{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted)}.footer-links a:hover{color:var(--accent)}
         .footer-copy{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
-        @media(max-width:768px){.header-nav{display:none}.container{padding:24px 16px 48px}}
+        .hamburger{display:none;background:none;border:none;cursor:pointer;padding:8px;margin-right:-8px}
+        .hamburger svg{width:24px;height:24px;stroke:var(--text);stroke-width:2;stroke-linecap:round}
+        .mobile-menu{display:none;position:fixed;inset:0;background:rgba(10,14,23,0.98);z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:32px}
+        .mobile-menu.open{display:flex}
+        .mobile-menu a{font-family:'JetBrains Mono',monospace;font-size:16px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);padding:12px 24px}
+        .mobile-menu a:hover,.mobile-menu a.active{color:var(--accent)}
+        .mobile-menu .close-menu{position:absolute;top:16px;right:20px;background:none;border:none;cursor:pointer;padding:8px}
+        .mobile-menu .close-menu svg{width:28px;height:28px;stroke:var(--text);stroke-width:2;stroke-linecap:round}
+        @media(max-width:768px){.header-nav{display:none}.hamburger{display:block}.container{padding:24px 16px 48px}h1{font-size:1.5rem}h2{font-size:1.2rem;margin-top:36px}p{font-size:0.95rem}.chart-guide{padding:18px}.chart-guide p{font-size:0.88rem}.key-table th,.key-table td{padding:8px 10px;font-size:0.85rem}.tip{padding:14px 16px}}
     </style>
 </head>
 <body>
@@ -57,7 +65,19 @@
         <a href="/schumann/science.html" class="active">Science</a>
         <a href="/schumann/history.html">History</a>
     </nav>
+    <button class="hamburger" onclick="document.getElementById('mobileMenu').classList.add('open')" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
 </div></div>
+<div class="mobile-menu" id="mobileMenu">
+    <button class="close-menu" onclick="document.getElementById('mobileMenu').classList.remove('open')" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
+    </button>
+    <a href="/schumann/">Live Data</a>
+    <a href="/schumann/about.html">About</a>
+    <a href="/schumann/science.html" class="active">Science</a>
+    <a href="/schumann/history.html">History</a>
+</div>
 
 <div class="container">
     <h1>Reading the Charts</h1>
