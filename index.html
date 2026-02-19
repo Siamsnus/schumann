@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schumann Resonance — Live Monitor</title>
+    <meta name="description" content="Live Schumann Resonance data from Tomsk Space Observatory. Real-time spectrograms, frequencies, amplitudes, ionosphere and solar activity monitoring.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ═══════════════════════════════════════
+           RESET & BASE
+           ═══════════════════════════════════════ */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0a0e17;
+            --bg2: #111827;
+            --card: #151d2e;
+            --border: #1e2d45;
+            --text: #e2e8f0;
+            --text2: #94a3b8;
+            --muted: #64748b;
+            --accent: #38bdf8;
+            --green: #34d399;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Outfit', ui-sans-serif, system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            background-image:
+                linear-gradient(rgba(56, 189, 248, 0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56, 189, 248, 0.015) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { color: #7dd3fc; }
+
+        /* ═══════════════════════════════════════
+           HEADER
+           ═══════════════════════════════════════ */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10, 14, 23, 0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+        }
+        .header-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 56px;
+        }
+        .logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: -0.02em;
+        }
+        .logo span { color: var(--accent); font-weight: 400; }
+
+        .header-nav {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+        .header-nav a {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            transition: color 0.2s;
+        }
+        .header-nav a:hover { color: var(--accent); }
+
+        /* ═══════════════════════════════════════
+           MAIN CONTAINER
+           ═══════════════════════════════════════ */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px 24px 64px;
+        }
+
+        /* ═══════════════════════════════════════
+           HERO
+           ═══════════════════════════════════════ */
+        h1 {
+            font-size: clamp(2rem, 4.5vw, 3rem);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.15;
+            margin-bottom: 12px;
+        }
+        h1 .hz {
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            font-size: 0.65em;
+        }
+        .intro {
+            font-size: 1.05rem;
+            color: var(--text2);
+            font-weight: 300;
+            max-width: 720px;
+            line-height: 1.7;
+            margin-bottom: 28px;
+        }
+
+        /* ═══════════════════════════════════════
+           STATUS BAR
+           ═══════════════════════════════════════ */
+        .status-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            align-items: center;
+            padding: 14px 0;
+            margin-bottom: 40px;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+        }
+        .status-item { display: flex; align-items: center; gap: 8px; }
+        .status-label {
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-size: 10px;
+        }
+        .status-value { color: var(--text); }
+        .live-dot {
+            width: 8px; height: 8px;
+            background: var(--green);
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
+        }
+        .refresh-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--muted);
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .refresh-btn:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: rgba(56, 189, 248, 0.08);
+        }
+
+        /* ═══════════════════════════════════════
+           SECTIONS
+           ═══════════════════════════════════════ */
+        h2 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            margin-top: 52px;
+            margin-bottom: 20px;
+            letter-spacing: -0.01em;
+        }
+        .section-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--muted);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-left: 10px;
+        }
+        .section-desc {
+            color: var(--text2);
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            max-width: 700px;
+        }
+
+        /* ═══════════════════════════════════════
+           FREQUENCY BADGES
+           ═══════════════════════════════════════ */
+        .freq-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 0 0 24px;
+        }
+        .freq-badge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 18px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            transition: border-color 0.3s;
+        }
+        .freq-badge:hover { border-color: var(--accent); }
+        .freq-badge .val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .freq-badge .mode {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* ═══════════════════════════════════════
+           GRID & CARDS
+           ═══════════════════════════════════════ */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .grid-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+        .card:hover { border-color: rgba(56, 189, 248, 0.3); }
+
+        .card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.4);
+        }
+        .card-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+        }
+        .card-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .card-body {
+            padding: 4px;
+            position: relative;
+            min-height: 180px;
+        }
+        .card-body img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px;
+            background: #0d1320;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .card-body img.loaded { opacity: 1; }
+        .loading {
+            position: absolute;
+            inset: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0d1320;
+            border-radius: 8px;
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+        }
+        .loading.hidden { display: none; }
+        .card-foot {
+            padding: 12px 18px;
+            border-top: 1px solid var(--border);
+            font-size: 13px;
+            color: var(--text2);
+            line-height: 1.6;
+        }
+
+        /* ═══════════════════════════════════════
+           SOURCES BOX
+           ═══════════════════════════════════════ */
+        .sources {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 52px;
+        }
+        .sources h3 {
+            font-size: 1rem;
+            margin-bottom: 12px;
+        }
+        .sources p {
+            font-size: 0.9rem;
+            color: var(--text2);
+            margin-bottom: 6px;
+        }
+        .sources .credit {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 14px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ═══════════════════════════════════════
+           LIGHTBOX
+           ═══════════════════════════════════════ */
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            cursor: pointer;
+        }
+        .lightbox.active { display: flex; }
+        .lightbox img {
+            max-width: 95vw;
+            max-height: 95vh;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 16px; right: 24px;
+            color: #fff;
+            font-size: 36px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            line-height: 1;
+            z-index: 10000;
+        }
+
+        /* ═══════════════════════════════════════
+           FOOTER
+           ═══════════════════════════════════════ */
+        .footer {
+            border-top: 1px solid var(--border);
+            padding: 24px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        /* ═══════════════════════════════════════
+           SCROLLBAR
+           ═══════════════════════════════════════ */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+        /* ═══════════════════════════════════════
+           RESPONSIVE
+           ═══════════════════════════════════════ */
+        @media (max-width: 1024px) {
+            .grid-3 { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .status-bar { gap: 12px; }
+            .header-nav { display: none; }
+            .container { padding: 20px 16px 48px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════ HEADER ═══════════════════════ -->
+<div class="header">
+    <div class="header-inner">
+        <div class="logo">Schumann <span>Monitor</span></div>
+        <nav class="header-nav">
+            <a href="#spectrogram">Spectrogram</a>
+            <a href="#resonance">Resonance</a>
+            <a href="#ionosphere">Ionosphere</a>
+            <a href="#solar">Solar</a>
+            <a href="#sources">Sources</a>
+        </nav>
+    </div>
+</div>
+
+<!-- ═══════════════════════ MAIN ═══════════════════════ -->
+<div class="container">
+
+    <!-- HERO -->
+    <h1>Schumann Resonance <span class="hz">7.83 Hz</span></h1>
+    <p class="intro">Real-time electromagnetic resonance monitoring — data sourced from the Space Observatory System in Tomsk, Russia via the <a href="https://www.schumann-frequenz-resonanz.de/">schumann-frequenz-resonanz.de</a> CDN.</p>
+
+    <!-- STATUS BAR -->
+    <div class="status-bar">
+        <div class="status-item">
+            <span class="live-dot"></span>
+            <span class="status-value">LIVE</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Source</span>
+            <span class="status-value">German CDN · Tomsk Data</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">CDN Time (CET)</span>
+            <span class="status-value" id="cdn-time">—</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Auto-refresh</span>
+            <span class="status-value">5 min</span>
+        </div>
+        <div class="status-item" style="margin-left:auto;">
+            <button class="refresh-btn" onclick="refreshAll()">↻ Refresh</button>
+        </div>
+    </div>
+
+    <!-- ═══════════ SPECTROGRAM ═══════════ -->
+    <h2 id="spectrogram">Spectrogram <span class="section-label">24h view</span></h2>
+    <div class="grid">
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">◈ Live Spectrogram — Frequency vs Time</span>
+                <span class="card-meta">Tomsk UTC+7</span>
+            </div>
+            <div class="card-body">
+                <img id="img-schumann" alt="Schumann Resonance Spectrogram" onclick="openLightbox(this)">
+                <div class="loading" id="load-schumann">Loading spectrogram...</div>
+            </div>
+            <div class="card-foot">Power spectral density of Earth's electromagnetic field in the ELF range (3–50 Hz). Bright horizontal bands indicate Schumann resonance modes at 7.83, 14.3, 20.8, 27.3, and 33.8 Hz.</div>
+        </div>
+    </div>
+
+    <!-- ═══════════ RESONANCE COMPONENTS ═══════════ -->
+    <h2 id="resonance">Resonance Components <span class="section-label">Amplitude · Frequency · Q-Factor</span></h2>
+
+    <div class="freq-list">
+        <div class="freq-badge"><span class="val">7.83</span><span class="mode">1st</span></div>
+        <div class="freq-badge"><span class="val">14.3</span><span class="mode">2nd</span></div>
+        <div class="freq-badge"><span class="val">20.8</span><span class="mode">3rd</span></div>
+        <div class="freq-badge"><span class="val">27.3</span><span class="mode">4th</span></div>
+        <div class="freq-badge"><span class="val">33.8</span><span class="mode">5th</span></div>
+    </div>
+
+    <div class="grid grid-2">
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">△ Amplitude</span>
+                <span class="card-meta">Relative power</span>
+            </div>
+            <div class="card-body">
+                <img id="img-amplitude" alt="Amplitude" onclick="openLightbox(this)">
+                <div class="loading" id="load-amplitude">Loading amplitude...</div>
+            </div>
+            <div class="card-foot">Signal strength of each resonance mode. Spikes indicate increased global lightning or ionospheric disturbances.</div>
+        </div>
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">∿ Frequency Variation</span>
+                <span class="card-meta">Hz deviation</span>
+            </div>
+            <div class="card-body">
+                <img id="img-frequency" alt="Frequency" onclick="openLightbox(this)">
+                <div class="loading" id="load-frequency">Loading frequency...</div>
+            </div>
+            <div class="card-foot">Center frequency of each mode. The fundamental fluctuates between 7.6–8.2 Hz depending on ionospheric conditions.</div>
+        </div>
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">◎ Quality Factor (Q)</span>
+                <span class="card-meta">Resonance sharpness</span>
+            </div>
+            <div class="card-body">
+                <img id="img-quality" alt="Quality Factor" onclick="openLightbox(this)">
+                <div class="loading" id="load-quality">Loading Q-factor...</div>
+            </div>
+            <div class="card-foot">How "sharp" each resonance peak is. Higher Q = cleaner resonance with less energy loss per cycle.</div>
+        </div>
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">◬ EM Background Level</span>
+                <span class="card-meta">Noise floor</span>
+            </div>
+            <div class="card-body">
+                <img id="img-em-background" alt="EM Background" onclick="openLightbox(this)">
+                <div class="loading" id="load-em-background">Loading EM background...</div>
+            </div>
+            <div class="card-foot">Electromagnetic background noise level. Changes can indicate space weather events.</div>
+        </div>
+    </div>
+
+    <!-- ═══════════ IONOSPHERE & GEOMAGNETIC ═══════════ -->
+    <h2 id="ionosphere">Ionosphere &amp; Geomagnetic <span class="section-label">Upper atmosphere · Magnetic field</span></h2>
+    <p class="section-desc">The ionosphere forms the upper boundary of the Schumann resonance cavity. Its dynamics directly affect resonance frequencies and amplitudes.</p>
+
+    <div class="grid grid-2">
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">◈ Ionogram</span>
+                <span class="card-meta">Layer state</span>
+            </div>
+            <div class="card-body">
+                <img id="img-ionogram" alt="Ionogram" onclick="openLightbox(this)">
+                <div class="loading" id="load-ionogram">Loading ionogram...</div>
+            </div>
+            <div class="card-foot">The ionosphere — conductive boundary 60–1000 km above Earth forming the upper wall of the Schumann cavity.</div>
+        </div>
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">⊕ Magnetic Field Components</span>
+                <span class="card-meta">K-Index</span>
+            </div>
+            <div class="card-body">
+                <img id="img-magnetic-field" alt="Magnetic Field" onclick="openLightbox(this)">
+                <div class="loading" id="load-magnetic-field">Loading magnetic field...</div>
+            </div>
+            <div class="card-foot">Earth's magnetic field disturbance level. K-index 5+ indicates a geomagnetic storm.</div>
+        </div>
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">∿ Critical Frequencies</span>
+                <span class="card-meta">Ionospheric layers</span>
+            </div>
+            <div class="card-body">
+                <img id="img-critical-freq" alt="Critical Frequencies" onclick="openLightbox(this)">
+                <div class="loading" id="load-critical-freq">Loading critical frequencies...</div>
+            </div>
+            <div class="card-foot">Critical frequencies of ionospheric layers determine radio wave propagation and reflection.</div>
+        </div>
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">∿ Critical (no sporadic)</span>
+                <span class="card-meta">Clean signal</span>
+            </div>
+            <div class="card-body">
+                <img id="img-critical-no-sporad" alt="Critical Frequencies (no sporadic)" onclick="openLightbox(this)">
+                <div class="loading" id="load-critical-no-sporad">Loading...</div>
+            </div>
+            <div class="card-foot">Critical frequencies with sporadic E-layer removed for cleaner analysis of regular ionospheric structure.</div>
+        </div>
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">↕ Active Heights</span>
+                <span class="card-meta">Layer altitude</span>
+            </div>
+            <div class="card-body">
+                <img id="img-active-heights" alt="Active Heights" onclick="openLightbox(this)">
+                <div class="loading" id="load-active-heights">Loading active heights...</div>
+            </div>
+            <div class="card-foot">Active heights of ionospheric layers — the altitude at which each layer reflects radio signals.</div>
+        </div>
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">⊕ World K-Index Database</span>
+                <span class="card-meta">NOAA Global</span>
+            </div>
+            <div class="card-body">
+                <img id="img-world-database" alt="World Database" onclick="openLightbox(this)">
+                <div class="loading" id="load-world-database">Loading world data...</div>
+            </div>
+            <div class="card-foot">Global geomagnetic K-index data from NOAA monitoring stations worldwide.</div>
+        </div>
+    </div>
+
+    <!-- ═══════════ SOLAR ACTIVITY ═══════════ -->
+    <h2 id="solar">Solar Activity <span class="section-label">NOAA · NASA SDO · SOHO</span></h2>
+    <p class="section-desc">Solar events drive changes in Earth's ionosphere and magnetic field, directly influencing Schumann resonance parameters.</p>
+
+    <div class="grid grid-2">
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">☀ X-Ray Flux</span>
+                <span class="card-meta">Solar flares</span>
+            </div>
+            <div class="card-body">
+                <img id="img-solar-xray" alt="Solar X-Ray Flux" onclick="openLightbox(this)">
+                <div class="loading" id="load-solar-xray">Loading X-ray flux...</div>
+            </div>
+            <div class="card-foot">Solar X-ray flux from GOES satellites. Spikes indicate solar flares impacting Earth's ionosphere.</div>
+        </div>
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">☀ Sunspot Regions</span>
+                <span class="card-meta">Active regions</span>
+            </div>
+            <div class="card-body">
+                <img id="img-sunspots" alt="Sunspot Regions" onclick="openLightbox(this)">
+                <div class="loading" id="load-sunspots">Loading sunspots...</div>
+            </div>
+            <div class="card-foot">Active sunspot regions. More sunspots = higher solar activity and geomagnetic effects.</div>
+        </div>
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">☀ Coronal Holes</span>
+                <span class="card-meta">Solar wind source</span>
+            </div>
+            <div class="card-body">
+                <img id="img-coronal-holes" alt="Coronal Holes" onclick="openLightbox(this)">
+                <div class="loading" id="load-coronal-holes">Loading coronal holes...</div>
+            </div>
+            <div class="card-foot">Dark regions where magnetic field lines open to space, releasing fast solar wind streams.</div>
+        </div>
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">☀ Thematic Map</span>
+                <span class="card-meta">GOES-18</span>
+            </div>
+            <div class="card-body">
+                <img id="img-thematic-18" alt="Thematic Map GOES-18" onclick="openLightbox(this)">
+                <div class="loading" id="load-thematic-18">Loading thematic map...</div>
+            </div>
+            <div class="card-foot">GOES-18 thematic solar map identifying active regions, coronal holes, and filaments.</div>
+        </div>
+    </div>
+
+    <!-- CORONAGRAPHS -->
+    <h2>Coronagraphs <span class="section-label">SOHO LASCO</span></h2>
+    <p class="section-desc">The Large Angle Spectrometric Coronagraph creates artificial solar eclipses to observe coronal mass ejections (CMEs) heading toward Earth.</p>
+
+    <div class="grid grid-2">
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">☀ LASCO C2</span>
+                <span class="card-meta">Inner corona</span>
+            </div>
+            <div class="card-body">
+                <img id="img-lasco-c2" alt="LASCO C2" onclick="openLightbox(this)">
+                <div class="loading" id="load-lasco-c2">Loading LASCO C2...</div>
+            </div>
+            <div class="card-foot">Inner corona (2–6 solar radii). CMEs visible as expanding plasma clouds.</div>
+        </div>
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">☀ LASCO C3</span>
+                <span class="card-meta">Outer corona</span>
+            </div>
+            <div class="card-body">
+                <img id="img-lasco-c3" alt="LASCO C3" onclick="openLightbox(this)">
+                <div class="loading" id="load-lasco-c3">Loading LASCO C3...</div>
+            </div>
+            <div class="card-foot">Outer corona (3.7–30 solar radii). Tracks CMEs as they travel toward Earth.</div>
+        </div>
+    </div>
+
+    <!-- SUVI -->
+    <h2>Solar Ultraviolet <span class="section-label">SUVI · GOES-18</span></h2>
+    <p class="section-desc">Solar Ultraviolet Imager captures the Sun at extreme ultraviolet wavelengths to monitor flares and coronal holes.</p>
+
+    <div class="grid grid-3">
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">SUVI 094 Å</span>
+                <span class="card-meta">Fe XVIII · 6.3 MK</span>
+            </div>
+            <div class="card-body">
+                <img id="img-suvi-094-18" alt="SUVI 094" onclick="openLightbox(this)">
+                <div class="loading" id="load-suvi-094-18">Loading SUVI 094...</div>
+            </div>
+            <div class="card-foot">Hot flaring plasma (~6.3 million K). Bright regions indicate active solar flares.</div>
+        </div>
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">SUVI 171 Å</span>
+                <span class="card-meta">Fe IX · 630 kK</span>
+            </div>
+            <div class="card-body">
+                <img id="img-suvi-171-18" alt="SUVI 171" onclick="openLightbox(this)">
+                <div class="loading" id="load-suvi-171-18">Loading SUVI 171...</div>
+            </div>
+            <div class="card-foot">Quiet corona and coronal loops (~630,000 K). Shows overall magnetic structure.</div>
+        </div>
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">SUVI 304 Å</span>
+                <span class="card-meta">He II · 50 kK</span>
+            </div>
+            <div class="card-body">
+                <img id="img-suvi-304-18" alt="SUVI 304" onclick="openLightbox(this)">
+                <div class="loading" id="load-suvi-304-18">Loading SUVI 304...</div>
+            </div>
+            <div class="card-foot">Chromosphere/transition region (~50,000 K). Filaments and prominences visible.</div>
+        </div>
+    </div>
+
+    <!-- SDO / HMI / AIA -->
+    <h2>Solar Dynamics Observatory <span class="section-label">NASA SDO · HMI · AIA</span></h2>
+
+    <div class="grid grid-2">
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">HMI Intensitygram</span>
+                <span class="card-meta">Photosphere</span>
+            </div>
+            <div class="card-body">
+                <img id="img-hmi-intensity" alt="HMI Intensitygram" onclick="openLightbox(this)">
+                <div class="loading" id="load-hmi-intensity">Loading HMI intensitygram...</div>
+            </div>
+            <div class="card-foot">Visible light image showing sunspot regions on the photosphere.</div>
+        </div>
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">HMI Magnetogram</span>
+                <span class="card-meta">Magnetic field</span>
+            </div>
+            <div class="card-body">
+                <img id="img-hmi-magneto" alt="HMI Magnetogram" onclick="openLightbox(this)">
+                <div class="loading" id="load-hmi-magneto">Loading HMI magnetogram...</div>
+            </div>
+            <div class="card-foot">Solar magnetic field polarity. White = north, black = south. Complex regions = higher flare risk.</div>
+        </div>
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">AIA 171 Å</span>
+                <span class="card-meta">Corona · 630 kK</span>
+            </div>
+            <div class="card-body">
+                <img id="img-aia-171" alt="AIA 171" onclick="openLightbox(this)">
+                <div class="loading" id="load-aia-171">Loading AIA 171...</div>
+            </div>
+            <div class="card-foot">Quiet corona showing coronal loops and magnetic field structure in EUV.</div>
+        </div>
+        <div class="card">
+            <div class="card-head">
+                <span class="card-title">AIA 304 Å</span>
+                <span class="card-meta">Chromosphere · 50 kK</span>
+            </div>
+            <div class="card-body">
+                <img id="img-aia-304" alt="AIA 304" onclick="openLightbox(this)">
+                <div class="loading" id="load-aia-304">Loading AIA 304...</div>
+            </div>
+            <div class="card-foot">Chromosphere and transition region showing filaments, flares, and prominences.</div>
+        </div>
+    </div>
+
+    <!-- ═══════════ SOURCES ═══════════ -->
+    <div class="sources" id="sources">
+        <h3>Data Sources</h3>
+        <p>Schumann resonance: <a href="http://sosrff.tsu.ru/" target="_blank">Space Observatory System (SOS), Tomsk State University</a> via <a href="https://www.schumann-frequenz-resonanz.de/" target="_blank">schumann-frequenz-resonanz.de</a></p>
+        <p>Solar activity: <a href="https://www.swpc.noaa.gov/" target="_blank">NOAA Space Weather Prediction Center</a></p>
+        <p>Solar imagery: <a href="https://sdo.gsfc.nasa.gov/" target="_blank">NASA SDO</a> · <a href="https://soho.nascom.nasa.gov/" target="_blank">ESA/NASA SOHO</a></p>
+        <p class="credit">Hosted on GitHub Pages · Zero servers · Zero cost</p>
+    </div>
+
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <button class="lightbox-close" onclick="closeLightbox()">×</button>
+    <img id="lightbox-img" src="" alt="Full size">
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+    Schumann Resonance Monitor · Data updates every 5 minutes
+</div>
+
+<!-- ═══════════════════════════════════════
+     IMAGE LOADER — German CDN with timezone logic
+     Ported from schumann-monitor.php
+     ═══════════════════════════════════════ -->
+<script>
+(function() {
+    var CDN = 'https://www.schumann-frequenz-resonanz.de/assets/images/';
+
+    var IMAGES = {
+        // Schumann Resonance
+        'schumann':           ['schumann-frequenz', 'jpg'],
+        'quality':            ['qualitaetsfaktoren-der-schumann-frequenz', 'jpg'],
+        'amplitude':          ['amplituden-der-schumann-frequenz', 'jpg'],
+        'frequency':          ['frequenzen-der-schumann-frequenz', 'jpg'],
+        'em-background':      ['elektromagnetischer-hintergrundpegel-schumann-frequenz', 'jpg'],
+        'ionogram':           ['letztes-ionogramm-schumann-frequenz', 'jpg'],
+        'critical-freq':      ['kritische-frequenzen-schumann-frequenz', 'jpg'],
+        'critical-no-sporad': ['kritische-frequenzen-ohne-sporadische-schichten', 'jpg'],
+        'active-heights':     ['aktive-hoehen-schumann-frequenz', 'jpg'],
+        'magnetic-field':     ['magnetfeldkomponenten-schumann-frequenz', 'jpg'],
+        'world-database':     ['weltdatenbank', 'bmp'],
+        // Solar Activity
+        'solar-xray':         ['sonneneruptionen', 'png'],
+        'lasco-c2':           ['lasco-c2-512', 'jpg'],
+        'lasco-c3':           ['lasco-c3-512', 'jpg'],
+        'suvi-094-18':        ['suvi-094-goes-18', 'png'],
+        'suvi-171-18':        ['suvi-171-goes-18', 'png'],
+        'suvi-304-18':        ['suvi-304-goes-18', 'png'],
+        'thematic-18':        ['thematische-karte-goes-18', 'png'],
+        'sunspots':           ['sonnenfleckenregionen', 'jpg'],
+        'coronal-holes':      ['koronale-loecher', 'jpg'],
+        'hmi-intensity':      ['hmi-intensitygram', 'jpg'],
+        'hmi-magneto':        ['hmi-magnetogram', 'jpg'],
+        'aia-171':            ['aia-171', 'jpg'],
+        'aia-304':            ['aia-304', 'jpg']
+    };
+
+    function getTimestamps(maxBack) {
+        maxBack = maxBack || 24;
+        var stamps = [];
+        var now = Date.now();
+        var seen = {};
+
+        for (var i = 0; i <= maxBack; i++) {
+            var d = new Date(now - (i * 5 * 60 * 1000));
+            var parts = {};
+            new Intl.DateTimeFormat('en-GB', {
+                timeZone: 'Europe/Berlin',
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', hour12: false
+            }).formatToParts(d).forEach(function(p) { parts[p.type] = p.value; });
+
+            var min = Math.floor(parseInt(parts.minute) / 5) * 5;
+            var ts = parts.day + '-' + parts.month + '-' + parts.year + '-' + parts.hour + '-' + String(min).padStart(2, '0');
+            if (!seen[ts]) { seen[ts] = true; stamps.push(ts); }
+        }
+        return stamps;
+    }
+
+    function loadImage(key) {
+        var img = document.getElementById('img-' + key);
+        var load = document.getElementById('load-' + key);
+        if (!img || !IMAGES[key]) return;
+
+        var info = IMAGES[key];
+        var stamps = getTimestamps(24);
+        var idx = 0;
+
+        function tryNext() {
+            if (idx >= stamps.length) {
+                if (load) load.textContent = 'Temporarily unavailable';
+                return;
+            }
+            var url = CDN + info[0] + '-' + stamps[idx] + '.' + info[1];
+            idx++;
+            var tmp = new Image();
+            tmp.onload = function() {
+                img.src = url;
+                img.classList.add('loaded');
+                if (load) load.classList.add('hidden');
+            };
+            tmp.onerror = function() { tryNext(); };
+            tmp.src = url;
+        }
+        tryNext();
+    }
+
+    function loadAll() {
+        Object.keys(IMAGES).forEach(function(k) { loadImage(k); });
+    }
+
+    function updateTime() {
+        var el = document.getElementById('cdn-time');
+        if (el) el.textContent = new Date().toLocaleString('en-GB', {
+            timeZone: 'Europe/Berlin',
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', hour12: false
+        }) + ' CET';
+    }
+
+    // Global functions
+    window.refreshAll = function() {
+        Object.keys(IMAGES).forEach(function(k) {
+            var img = document.getElementById('img-' + k);
+            var load = document.getElementById('load-' + k);
+            if (img) { img.classList.remove('loaded'); img.removeAttribute('src'); }
+            if (load) { load.classList.remove('hidden'); load.textContent = 'Refreshing...'; }
+        });
+        loadAll();
+        updateTime();
+    };
+
+    window.openLightbox = function(el) {
+        if (el && el.src) {
+            document.getElementById('lightbox-img').src = el.src;
+            document.getElementById('lightbox').classList.add('active');
+        }
+    };
+    window.closeLightbox = function() {
+        document.getElementById('lightbox').classList.remove('active');
+    };
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLightbox(); });
+
+    // Init
+    loadAll();
+    updateTime();
+    setInterval(function() { loadAll(); updateTime(); }, 5 * 60 * 1000);
+    setInterval(updateTime, 60 * 1000);
+})();
+</script>
+
+</body>
+</html>
